@@ -1,0 +1,6 @@
+class Operation:
+    def __init__(self, user_id):
+        self.user_id = user_id
+    
+    def execute():
+        raise NotImplementedError("Необходимо переопределить метод")

@@ -4,6 +4,8 @@ import random
 import requests
 from bs4 import BeautifulSoup
 
+from user import User
+
 token = ''
 with open("../secret.txt", 'r') as file:
     token = file.readline().strip()
@@ -13,7 +15,7 @@ bot = telebot.TeleBot(token)
 @bot.message_handler(commands=['start', 'Help', 'help'])
 def start(message):
     markup = types.ReplyKeyboardMarkup(True, row_width=2)
-    helper = types.KeyboardButton('/Helpers')
+    helper = types.KeyboardButton('/Helper')
     wallet = types.KeyboardButton('/Wallet')
     exchanger = types.KeyboardButton('/Exchanger')
     newss = types.KeyboardButton('/News')
@@ -21,10 +23,9 @@ def start(message):
     markup.add(helper, wallet, exchanger, about_service, newss)
     bot.send_message(message.chat.id, 'Команды', reply_markup=markup)
 
-
-def on_click(message):
-    if message.text == 'News':
-        bot.send_message(message.chat.id, 'новости', )
+    user_id = message.from_user.id
+    user = User(str(user_id))
+    print(user.get_balance())
 
 
 @bot.message_handler(commands=['Helper', 'helper', 'менеджер'])

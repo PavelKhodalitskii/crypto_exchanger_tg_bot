@@ -1,5 +1,4 @@
 import sqlite3
-from user import User
 
 class DataAccessObject:
     __instance = None
@@ -20,19 +19,19 @@ class DataAccessObject:
         self.__instance = None
 
     def __create_tables(self):
-        self.__cursor.execute("DROP TABLE IF EXISTS users")
-        self.__cursor.execute("DROP TABLE IF EXISTS operation_exchange")
-        self.__cursor.execute("DROP TABLE IF EXISTS operation_withdraws")
-        self.__cursor.execute("DROP TABLE IF EXISTS operation_fillup")
+        # self.__cursor.execute("DROP TABLE IF EXISTS users")
+        # self.__cursor.execute("DROP TABLE IF EXISTS operation_exchange")
+        # self.__cursor.execute("DROP TABLE IF EXISTS operation_withdraws")
+        # self.__cursor.execute("DROP TABLE IF EXISTS operation_fillup")
         self.__cursor.execute('''
-            CREATE TABLE users (
+            CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
                 telegram_id VARCHAR(255),
                 wallet_number VARCHAR(256)
             )
         ''')
         self.__cursor.execute('''
-            CREATE TABLE operation_exchange (
+            CREATE TABLE IF NOT EXISTS operation_exchange (
                 id INTEGER PRIMARY KEY,
                 date_time DATETIME2,
                 user_id INTEGER,
@@ -40,7 +39,7 @@ class DataAccessObject:
             )
         ''')
         self.__cursor.execute('''
-            CREATE TABLE operation_fillup (
+            CREATE TABLE IF NOT EXISTS operation_fillup (
                 id INTEGER PRIMARY KEY,
                 date_time DATETIME2,
                 user_ids INTEGER,
@@ -48,7 +47,7 @@ class DataAccessObject:
             )
         ''')
         self.__cursor.execute('''
-            CREATE TABLE operation_withdraws (
+            CREATE TABLE IF NOT EXISTS operation_withdraws (
                 id INTEGER PRIMARY KEY,
                 date_time DATETIME2,
                 user_ids INTEGER,
@@ -57,11 +56,12 @@ class DataAccessObject:
         ''')
         self.__connection.commit()
 
-    def save_user(self, user):
+    def save_user(self, telegram_id, wallet_number):
         self.__cursor.execute(f'''
             INSERT INTO users (telegram_id, wallet_number)
-            VALUES ('{user.get_telegram_id()}', '{user.get_wallet_number()}')
+            VALUES ('{telegram_id}', '{wallet_number}')
         ''')
+        self.__connection.commit()
     
     def get_user(self, telegram_id):
         self.__cursor.execute(f'''
@@ -76,11 +76,3 @@ class DataAccessObject:
     
     def get_opeation(self, telegram_operation):
         pass
-
-
-user = User("253453")
-db = DataAccessObject()
-db2 = DataAccessObject()
-print(id(db), id(db2))
-db.save_user(user)
-print(db.get_user(user.get_telegram_id()))
