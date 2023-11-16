@@ -5,8 +5,9 @@ class DataAccessObject:
     __instance = None
 
     def __init__(self):
-        self.__instance = sqlite3.connect('db.sqlite3')
-        self.__cursor = self.__instance.cursor()
+        self.__instance = self
+        self.__connection = sqlite3.connect('db.sqlite3')
+        self.__cursor = self.__connection.cursor()
         self.__create_tables()
     
     def __new__(cls):
@@ -15,12 +16,14 @@ class DataAccessObject:
         return cls.__instance
     
     def __del__(self):
-        self.__instance.close()
+        self.__connection.close()
         self.__instance = None
 
     def __create_tables(self):
         self.__cursor.execute("DROP TABLE IF EXISTS users")
-        self.__cursor.execute("DROP TABLE IF EXISTS operations")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_exchange")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_withdraws")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_fillup")
         self.__cursor.execute('''
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY,
@@ -29,18 +32,36 @@ class DataAccessObject:
             )
         ''')
         self.__cursor.execute('''
-            CREATE TABLE operations (
+            CREATE TABLE operation_exchange (
+                id INTEGER PRIMARY KEY,
+                date_time DATETIME2,
+                user_id INTEGER,
+                FOREIGN KEY(user_id) REFERENCES users(id) 
+            )
+        ''')
+        self.__cursor.execute('''
+            CREATE TABLE operation_fillup (
                 id INTEGER PRIMARY KEY,
                 date_time DATETIME2,
                 user_ids INTEGER,
                 FOREIGN KEY(user_ids) REFERENCES users(id) 
             )
         ''')
-        self.__instance.commit()
+        self.__cursor.execute('''
+            CREATE TABLE operation_withdraws (
+                id INTEGER PRIMARY KEY,
+                date_time DATETIME2,
+                user_ids INTEGER,
+                FOREIGN KEY(user_ids) REFERENCES users(id) 
+            )
+        ''')
+        self.__connection.commit()
 
-    def save_user(self,user):
-        self.__cursor.execute(f'''INSERT INTO users (telegram_id) VALUES ({user.get_telegram_id()})''')
-        self.__cursor.execute(f'''INSERT INTO users (wallet_number) VALUES ({user.get_wallet_number()})''')
+    def save_user(self, user):
+        self.__cursor.execute(f'''
+            INSERT INTO users (telegram_id, wallet_number)
+            VALUES ('{user.get_telegram_id()}', '{user.get_wallet_number()}')
+        ''')
     
     def get_user(self, telegram_id):
         self.__cursor.execute(f'''
@@ -59,5 +80,7 @@ class DataAccessObject:
 
 user = User("253453")
 db = DataAccessObject()
+db2 = DataAccessObject()
+print(id(db), id(db2))
 db.save_user(user)
 print(db.get_user(user.get_telegram_id()))
