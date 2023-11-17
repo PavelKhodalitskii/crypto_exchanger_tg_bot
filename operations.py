@@ -1,4 +1,5 @@
 from bit import PrivateKey
+import json
 
 class Operation:
     def __init__(self, user_id):
@@ -31,12 +32,13 @@ class Withdraw(Operation):
         return self.__amount
 
     def execute(self):
-        my_key = PrivateKey(wif=str(self.__private_key))
-        wallet = ""
-        with open("wallets.json", 'r') as wallets:
-            wallet = wallet[self.__type]
+        # my_key = PrivateKey(wif=str(self.__private_key))
+        # wallet = ""
+        with open("../wallets.json", 'r') as wallets_json:
+            wallets = json.load(wallets_json)
+            wallet = wallets[self.__type]
 
         print(wallet)
-        print(my_key)
+        # print(my_key)
         # fee=2000
         # tx_hash = my_key.create_transaction([(wallet, self.__amount, 'BTC')],fee=fee,absolute_fee=True)

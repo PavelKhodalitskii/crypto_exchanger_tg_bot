@@ -27,7 +27,9 @@ class DataAccessObject:
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
                 telegram_id VARCHAR(255),
-                wallet_number VARCHAR(256)
+                wallet_number VARCHAR(255),
+                private_key VARCHAR(255),
+                public_key VARCHAR(255)
             )
         ''')
         self.__cursor.execute('''
@@ -56,20 +58,37 @@ class DataAccessObject:
         ''')
         self.__connection.commit()
 
-    def save_user(self, telegram_id, wallet_number):
+    def save_user(self, telegram_id, wallet_number, private_key, public_key):
         self.__cursor.execute(f'''
-            INSERT INTO users (telegram_id, wallet_number)
-            VALUES ('{telegram_id}', '{wallet_number}')
+            INSERT INTO users (telegram_id, wallet_number, private_key, public_key)
+            VALUES ('{telegram_id}', '{wallet_number}', '{private_key}', '{public_key}')
         ''')
         self.__connection.commit()
     
-    def get_user(self, telegram_id):
+    def get_user_data(self, telegram_id):
         self.__cursor.execute(f'''
-            SELECT users.wallet_number
+            SELECT users.wallet_number, users.private_key, users.public_key
             FROM users
             WHERE telegram_id = {telegram_id}
         ''')
-        return self.__cursor.fetchone()
+        data_raw = self.__cursor.fetchone()
+        data = {
+            "wallet_number": "",
+            "private_key": "",
+            "public_key": ""
+        }
+        if data_raw:
+            for i in range(len(data_raw)):
+                if i == 0:
+                    data["wallet_number"] = data_raw[i]
+                if i == 1:
+                    data["private_key"] = data_raw[i]
+                if i == 2:
+                    data["public_key"] = data_raw[i]
+            return data
+        else:
+            return None
+            
 
     def save_operation(self, opeartion):
         pass
