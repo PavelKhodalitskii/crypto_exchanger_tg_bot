@@ -19,10 +19,10 @@ class DataAccessObject:
         self.__instance = None
 
     def __create_tables(self):
-        # self.__cursor.execute("DROP TABLE IF EXISTS users")
-        # self.__cursor.execute("DROP TABLE IF EXISTS operation_exchange")
-        # self.__cursor.execute("DROP TABLE IF EXISTS operation_withdraws")
-        # self.__cursor.execute("DROP TABLE IF EXISTS operation_fillup")
+        self.__cursor.execute("DROP TABLE IF EXISTS users")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_exchange")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_withdraws")
+        self.__cursor.execute("DROP TABLE IF EXISTS operation_fillup")
         self.__cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,

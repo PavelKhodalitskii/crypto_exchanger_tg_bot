@@ -8,13 +8,15 @@ class User:
         self.__telegram_id = telegram_id
         self.__is_exists = bool(self.database.get_user(self.__telegram_id))
         if not self.__is_exists:
-            self.__wallet_number = self._create_wallet()["address"]
+            self.__wallet_number = self.__create_wallet()["address"]
+            self.__private = self.__create_wallet()["private"]
+            self.__public = self.__create_wallet()["public"]
             self.database.save_user(self.__telegram_id, self.__wallet_number)
             print(self.database.get_user(telegram_id))
         else:
             self.__wallet_number = self.database.get_user(telegram_id)
 
-    def _create_wallet(self):
+    def __create_wallet(self):
         key = bitcoin.random_key()
         private = bitcoin.sha256(key) 
         public = bitcoin.privtopub(private)
