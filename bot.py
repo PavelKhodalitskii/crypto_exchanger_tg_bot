@@ -4,16 +4,21 @@ import random
 import requests
 from bs4 import BeautifulSoup
 
+from user import User
+from operations import Withdraw
+from database import DataAccessObject
+
 token = ''
 with open("../secret.txt", 'r') as file:
     token = file.readline().strip()
 bot = telebot.TeleBot(token)
 
+database = DataAccessObject()
 
 @bot.message_handler(commands=['start', 'Help', 'help'])
 def start(message):
     markup = types.ReplyKeyboardMarkup(True, row_width=2)
-    helper = types.KeyboardButton('/Helpers')
+    helper = types.KeyboardButton('/Helper')
     wallet = types.KeyboardButton('/Wallet')
     exchanger = types.KeyboardButton('/Exchanger')
     newss = types.KeyboardButton('/News')
@@ -21,10 +26,11 @@ def start(message):
     markup.add(helper, wallet, exchanger, about_service, newss)
     bot.send_message(message.chat.id, 'Команды', reply_markup=markup)
 
-
-def on_click(message):
-    if message.text == 'News':
-        bot.send_message(message.chat.id, 'новости', )
+    user_id = message.from_user.id
+    user = User(str(user_id))
+    # withdraw = Withdraw(user_id, user.get_private_key(), "BTC", 0.0000001)
+    # withdraw.execute()
+    print(user.get_balance())
 
 
 @bot.message_handler(commands=['Helper', 'helper', 'менеджер'])
@@ -37,7 +43,6 @@ def helpers(message):
 
 @bot.message_handler(commands=['News'])
 def news(message):
-
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                       "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -48,7 +53,6 @@ def news(message):
     soup = BeautifulSoup(page.content, "html.parser")
     newsss = soup.find_all("div", class_="news-item")
     for new in newsss:
-
         news_date = new.find("span", class_="news-date").text.strip()
         news_name = new.find("a", class_="news-name").text.strip()
         news_text = new.find("div", class_="news-text").text.strip()
