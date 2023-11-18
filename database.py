@@ -27,71 +27,81 @@ class DataAccessObject:
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
                 telegram_id VARCHAR(255),
-                wallet_number VARCHAR(255),
-                private_key VARCHAR(255),
-                public_key VARCHAR(255)
+                btc_wallet_number VARCHAR(255),
+                btc_private_key VARCHAR(255),
+                btc_public_key VARCHAR(255),
+                btc_wif VARCHAR(255),
+                eth_wallet_number VARCHAR(255),
+                eth_private_key VARCHAR(255),
+                eth_public_key VARCHAR(255)
             )
         ''')
         self.__cursor.execute('''
-            CREATE TABLE IF NOT EXISTS operation_exchange (
+            CREATE TABLE IF NOT EXISTS operations (
                 id INTEGER PRIMARY KEY,
-                date_time DATETIME2,
                 user_id INTEGER,
+                b_tx_hash VARCHAR(255),
+                c_tx_hash VARCHAR(255),
                 FOREIGN KEY(user_id) REFERENCES users(id) 
-            )
-        ''')
-        self.__cursor.execute('''
-            CREATE TABLE IF NOT EXISTS operation_fillup (
-                id INTEGER PRIMARY KEY,
-                date_time DATETIME2,
-                user_ids INTEGER,
-                FOREIGN KEY(user_ids) REFERENCES users(id) 
-            )
-        ''')
-        self.__cursor.execute('''
-            CREATE TABLE IF NOT EXISTS operation_withdraws (
-                id INTEGER PRIMARY KEY,
-                date_time DATETIME2,
-                user_ids INTEGER,
-                FOREIGN KEY(user_ids) REFERENCES users(id) 
             )
         ''')
         self.__connection.commit()
 
-    def save_user(self, telegram_id, wallet_number, private_key, public_key):
+    def save_user(self, 
+                  telegram_id, 
+                  btc_wallet_number, btc_private_key, btc_public_key, btc_wif, 
+                  eth_wallet_number, eth_private_key, eth_public_key):
         self.__cursor.execute(f'''
-            INSERT INTO users (telegram_id, wallet_number, private_key, public_key)
-            VALUES ('{telegram_id}', '{wallet_number}', '{private_key}', '{public_key}')
+            INSERT INTO users ('telegram_id', 'btc_wallet_number', 'btc_private_key', 'btc_wif', 'btc_public_key', 'eth_wallet_number', 'eth_private_key', 'eth_public_key')
+            VALUES ('{telegram_id}', 
+            '{btc_wallet_number}', 
+            '{btc_private_key}', 
+            '{btc_public_key}',
+            '{btc_wif}',
+            '{eth_wallet_number}', 
+            '{eth_private_key}',
+            '{eth_public_key}'
+            )
         ''')
         self.__connection.commit()
     
     def get_user_data(self, telegram_id):
         self.__cursor.execute(f'''
-            SELECT users.wallet_number, users.private_key, users.public_key
+            SELECT users.btc_wallet_number, users.btc_private_key, users.btc_public_key, users.btc_wif, users.eth_wallet_number, users.eth_private_key, users.eth_public_key 
             FROM users
             WHERE telegram_id = {telegram_id}
         ''')
         data_raw = self.__cursor.fetchone()
         data = {
-            "wallet_number": "",
-            "private_key": "",
-            "public_key": ""
+            "btc_wallet_number": "",
+            "btc_private_key": "",
+            "btc_public_key": "",
+            "btc_wif": "",
+            "eth_wallet_number": "",
+            "eth_private_key": "",
+            "eth_public_key": ""
         }
         if data_raw:
-            for i in range(len(data_raw)):
-                if i == 0:
-                    data["wallet_number"] = data_raw[i]
-                if i == 1:
-                    data["private_key"] = data_raw[i]
-                if i == 2:
-                    data["public_key"] = data_raw[i]
+            data["btc_wallet_number"] = data_raw[0]
+            data["btc_private_key"] = data_raw[1]
+            data["btc_public_key"] = data_raw[2]
+            data["btc_wif"] = data_raw[3]
+            data["eth_wallet_number"] = data_raw[4]
+            data["eth_private_key"] = data_raw[5]
+            data["eth_public_key"] = data_raw[6]
             return data
         else:
             return None
-            
-
-    def save_operation(self, opeartion):
-        pass
     
+    def save_operation(self, user_id, b_tx_hash, c_tx_hash):
+        self.__cursor.execute(f'''
+            INSERT INTO opearions ('user_id', 'b_tx_hash', 'c_tx_hash')
+            VALUES ('{user_id}',
+            '{b_tx_hash}',
+            '{c_tx_hash}'
+            )
+        ''')
+        self.__connection.commit()
+
     def get_opeation(self, telegram_operation):
         pass
